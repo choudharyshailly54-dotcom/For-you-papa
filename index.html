@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Papa!</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --baby-blue: #A2D2FF;
+            --pink-balloon: #FF85A1;
+            --cloud-white: rgba(255, 255, 255, 0.9);
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: var(--baby-blue);
+            overflow: hidden;
+        }
+
+        /* --- Animated Background (Clouds & Balloons) --- */
+        .sky { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        
+        .cloud {
+            position: absolute; background: white; border-radius: 50px;
+            opacity: 0.6; animation: drift 30s linear infinite;
+        }
+        .balloon {
+            position: absolute; width: 20px; height: 28px;
+            background: var(--pink-balloon); border-radius: 50%;
+            bottom: -100px; animation: floatUp 15s linear infinite;
+        }
+        .balloon::after {
+            content: ''; position: absolute; width: 1px; height: 30px;
+            background: rgba(0,0,0,0.2); top: 28px; left: 10px;
+        }
+
+        @keyframes drift { from { left: -150px; } to { left: 100%; } }
+        @keyframes floatUp { 
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-120vh) rotate(15deg); }
+        }
+
+        /* --- Page Transitions --- */
+        .page {
+            position: absolute; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 1s ease, transform 1s ease;
+            transform: translateY(20px); text-align: center;
+        }
+        .active { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        .glass-card {
+            background: var(--cloud-white); padding: 30px; border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); width: 85%; max-width: 450px;
+        }
+
+        /* --- Elements --- */
+        input { padding: 12px; margin: 8px; border-radius: 10px; border: 1px solid #ddd; width: 70%; }
+        button {
+            background: #4A90E2; color: white; border: none;
+            padding: 12px 25px; border-radius: 50px; cursor: pointer;
+            font-weight: bold; margin-top: 15px; transition: 0.3s;
+        }
+        button:hover { background: #FF85A1; transform: scale(1.05); }
+
+        .jar-img { width: 220px; cursor: pointer; transition: transform 0.3s; }
+        .jar-img:hover { transform: scale(1.1); }
+
+        .heart-float {
+            position: absolute; background: #FF4D6D; color: white;
+            padding: 10px; border-radius: 50%; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 5;
+        }
+
+        .gallery-container {
+            width: 300px; height: 400px; overflow: hidden;
+            border: 8px solid white; border-radius: 20px;
+        }
+        .gallery-track { display: flex; animation: scrollGallery 20s linear infinite; }
+        .gallery-track img { width: 300px; height: 400px; object-fit: cover; }
+        @keyframes scrollGallery { 0% { transform: translateX(0); } 100% { transform: translateX(-2400px); } }
+
+        .cake-box { position: relative; width: 300px; }
+        .cake-img { width: 100%; border-radius: 15px; }
+        .candle-interactive {
+            position: absolute; top: 10px; left: 50%;
+            transform: translateX(-50%); font-size: 50px; cursor: pointer;
+        }
+        .flame { animation: flicker 0.1s infinite alternate; }
+        @keyframes flicker { from { opacity: 1; transform: scale(1); } to { opacity: 0.7; transform: scale(1.1); } }
+    </style>
+</head>
+<body>
+
+    <div class="sky" id="sky"></div>
+    <audio id="bgMusic" loop><source src="Gehra Hua (instrumental)  Dhurandhar  Himanshu Katara.mp3" type="audio/mpeg"></audio>
+
+    <div id="p1" class="page active">
+        <div class="glass-card">
+            <h2 style="color: #4A90E2;">Happy Birthday, Papa!</h2>
+            <p>Please log in to your portal</p>
+            <input type="text" id="user" placeholder="Username">
+            <input type="password" id="pass" placeholder="Password">
+            <br><button onclick="checkLogin()">Enter World</button>
+        </div>
+    </div>
+
+    <div id="p2" class="page">
+        <div style="position: relative;">
+            <img src="11196.jpg" class="jar-img" onclick="releaseHearts()">
+            <div id="heartBox"></div>
+        </div>
+        <p style="color: white; font-weight: bold; margin-top: 20px;">Tap the jar to see your family's love!</p>
+        <button id="btn2" style="display:none;" onclick="showPage(3)">See Memories</button>
+    </div>
+
+    <div id="p3" class="page">
+        <div class="gallery-container">
+            <div class="gallery-track">
+                <img src="11191.jpg"><img src="11195.jpg"><img src="4577.jpg">
+                <img src="11193.jpg"><img src="11192.jpg"><img src="34.jpg">
+                <img src="11194.jpg"><img src="4576.jpg">
+            </div>
+        </div>
+        <button onclick="showPage(4)">Next Surprise</button>
+    </div>
+
+    <div id="p4" class="page">
+        <div class="glass-card">
+            <h3>Make a wish silently...</h3>
+            <h1 id="timer" style="color: #4A90E2;">5</h1>
+            <div class="cake-box">
+                <img src="11197.jpg" class="cake-img">
+                <div id="candle" class="candle-interactive" onclick="blowCandle()">
+                    🕯️<span class="flame" id="flame">🔥</span>
+                </div>
+            </div>
+            <p>Tap the flame to blow!</p>
+            <button id="btnFinal" style="display:none" onclick="showPage(5)">Read My Letter</button>
+        </div>
+    </div>
+
+    <div id="p5" class="page">
+        <div class="glass-card" id="letter" style="text-align: left; line-height: 1.6;">
+            <h3 style="text-align: center; color: #4A90E2;">To My Dearest Papa</h3>
+            <p>Happiest Birthday papa.</p>
+            <p>I know, life will never be perfect for everyone but for me? Anshi? Mummy? Life IS perfect. Because we have you.</p>
+            <p>Yes, we don't show how we all loves you, cause it's impossible to reciprocate the love you gave us. Thank you very much for being with us 💗🧿</p>
+            <p style="text-align: center; font-weight: bold;">Once again happy birthday papa 🎂</p>
+        </div>
+        <button onclick="downloadLetter()">Download Letter 📄</button>
+    </div>
+
+    <script>
+        // Generate Sky
+        const sky = document.getElementById('sky');
+        for(let i=0; i<15; i++) {
+            let b = document.createElement('div'); b.className = 'balloon';
+            b.style.left = Math.random() * 90 + '%'; b.style.animationDelay = Math.random() * 10 + 's';
+            sky.appendChild(b);
+            let c = document.createElement('div'); c.className = 'cloud';
+            c.style.width = '100px'; c.style.height = '40px';
+            c.style.top = Math.random() * 80 + '%'; c.style.animationDelay = Math.random() * 20 + 's';
+            sky.appendChild(c);
+        }
+
+        const family = {
+            "Sushma": "Happy Birthday 🎂 💗",
+            "Shreyanshi": "Happppyyyyy birthday papaaa, you are my favourite hero😋🎀",
+            "Mummy": "Khoob khush raha, bhagwaan sab achha kar thun🧿🩷",
+            "Pappa": "Haa! Happy Birthday, Guddu!! Khoob khoob badhiya😁✨",
+            "Shailly": "Happiest Birthday papa💖 Ram ji bless you with his dearest blessings 🎀"
+        };
+
+        function showPage(num) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            setTimeout(() => document.getElementById('p'+num).classList.add('active'), 100);
+        }
+
+        function checkLogin() {
+            if(document.getElementById('user').value === "Sanjeev" && document.getElementById('pass').value === "1702") {
+                document.getElementById('bgMusic').play();
+                showPage(2);
+            } else { alert("Try again, Papa! (Username: Sanjeev, Pass: 1702)"); }
+        }
+
+        let heartsClicked = 0;
+        function releaseHearts() {
+            if(document.getElementById('heartBox').children.length > 0) return;
+            Object.keys(family).forEach((name, i) => {
+                setTimeout(() => {
+                    let h = document.createElement('div'); h.className = 'heart-float';
+                    h.innerHTML = "❤️<br><small>"+name+"</small>";
+                    h.style.left = (Math.random() * 160 - 80) + 'px';
+                    h.style.top = '-' + (80 + i*50) + 'px';
+                    h.onclick = (e) => {
+                        e.stopPropagation(); alert(name + ": " + family[name]);
+                        h.style.opacity = '0.4'; heartsClicked++;
+                        if(heartsClicked === 5) document.getElementById('btn2').style.display='inline-block';
+                    };
+                    document.getElementById('heartBox').appendChild(h);
+                }, i * 500);
+            });
+        }
+
+        function blowCandle() {
+            let t = 5;
+            let timer = setInterval(() => {
+                t--; document.getElementById('timer').innerText = t;
+                if(t <= 0) {
+                    clearInterval(timer);
+                    document.getElementById('flame').style.display = 'none';
+                    document.getElementById('timer').innerText = "WISH MADE! ✨";
+                    document.getElementById('btnFinal').style.display = 'inline-block';
+                }
+            }, 1000);
+        }
+
+        function downloadLetter() {
+            const element = document.getElementById('letter');
+            html2pdf().from(element).save('Birthday_Letter_To_Papa.pdf');
+        }
+    </script>
+</body>
+  </html>
+  
